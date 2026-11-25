@@ -51,6 +51,8 @@ button:disabled{opacity:.6;cursor:wait}
 .guide{background:#000;border:1px solid var(--line);border-radius:14px;padding:14px 10px 6px;margin-bottom:12px}
 .guide{align-items:end}.guide figure{margin:0;text-align:center;font-size:12px;color:var(--rose);display:grid;gap:6px;justify-items:center}.guide img{height:150px;width:auto;max-width:100%}
 .hint{font-size:12px;color:var(--mute);margin-top:4px}.sub{font:500 13px Poppins,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:26px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+.laudo{border:1px dashed var(--rose2);border-radius:14px;position:relative;padding:18px 14px;text-align:center;font-size:14px;color:var(--mute);cursor:pointer}
+.laudo input{position:absolute;inset:0;opacity:0;cursor:pointer}.laudo.ok{color:var(--rose);border-style:solid}
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-top:18px}.consent input{width:22px;height:22px;flex:none;accent-color:#e4cdbf;margin-top:2px}
 .done{text-align:center;padding:28px 8px}.done svg{width:70px;height:70px;margin-bottom:8px}
 
@@ -186,6 +188,29 @@ button:disabled{opacity:.6;cursor:wait}
    <label for="obs">Tem mais alguma coisa que a gente precisa saber?</label><textarea id="obs" name="obs"></textarea>
   </div>
 
+  <div class="step" data-t="Avaliação física">
+   <h2>Avaliação física</h2>
+   <p class="mute small">Se você já fez bioimpedância, avaliação de dobras ou outra avaliação, os resultados ajudam a gente a montar seu plano e acompanhar sua evolução. Se não fez, é só marcar "Não fiz" e seguir.</p>
+   <label>Já fez alguma avaliação física?</label><div class="chips" data-r="aval"></div>
+   <div id="avaldet">
+    <label for="avaldata">Quando foi?</label><input type="text" id="avaldata" name="avaldata" placeholder="Ex.: outubro de 2026">
+    <label for="laudo">Envie o resultado (foto ou PDF)</label>
+    <div class="laudo" id="laudobox"><input type="file" id="laudo" accept="image/*,application/pdf" multiple><span id="laudolbl">Toque para enviar (até 3 arquivos)</span></div>
+    <p class="hint">Se preferir, preencha os principais números abaixo. Pode deixar em branco o que não souber.</p>
+    <div class="row">
+     <div><label for="avalpeso">Peso (kg)</label><input type="number" step="0.1" inputmode="decimal" id="avalpeso" name="avalpeso"></div>
+     <div><label for="avalgord">Gordura corporal (%)</label><input type="number" step="0.1" inputmode="decimal" id="avalgord" name="avalgord"></div>
+     <div><label for="avalmm">Massa magra (kg)</label><input type="number" step="0.1" inputmode="decimal" id="avalmm" name="avalmm"></div>
+    </div>
+    <div class="row">
+     <div><label for="avalmusc">Massa muscular (kg)</label><input type="number" step="0.1" inputmode="decimal" id="avalmusc" name="avalmusc"></div>
+     <div><label for="avalvisc">Gordura visceral (nível)</label><input type="number" step="1" inputmode="numeric" id="avalvisc" name="avalvisc"></div>
+     <div><label for="avaltmb">Metabolismo basal (kcal)</label><input type="number" step="1" inputmode="numeric" id="avaltmb" name="avaltmb"></div>
+    </div>
+    <label for="avalmed">Medidas, se tiver (cintura, abdômen, quadril, braço, coxa)</label><textarea id="avalmed" name="avalmed" placeholder="Ex.: cintura 72 cm, quadril 98 cm, braço 29 cm"></textarea>
+   </div>
+  </div>
+
   <div class="step" data-t="Fotos">
    <h2>Suas fotos</h2>
    <p class="mute small">Roupa de treino, corpo inteiro, de pé e <span class="g" data-f="relaxada" data-m="relaxado">relaxada</span>, boa luz e fundo liso. Mesma distância nas três. No perfil, braços estendidos à frente na altura dos ombros.</p>
@@ -204,7 +229,7 @@ button:disabled{opacity:.6;cursor:wait}
     <div class="drop"><input type="file" accept="image/*" data-f="perfil" aria-label="Foto de perfil"><span>Perfil<br>direito ou esquerdo</span></div>
     <div class="drop"><input type="file" accept="image/*" data-f="costas" aria-label="Foto de costas"><span>Costas<br>toque para enviar</span></div>
    </div>
-   <label class="consent"><input type="checkbox" id="lgpd" name="lgpd" value="sim"><span>Autorizo a EliteTeam a usar minhas respostas e fotos só para montar e acompanhar meu plano, com sigilo, conforme a LGPD. *</span></label>
+   <label class="consent"><input type="checkbox" id="lgpd" name="lgpd" value="sim"><span>Autorizo a EliteTeam a usar minhas respostas, fotos e avaliações só para montar e acompanhar meu plano, com sigilo, conforme a LGPD. *</span></label>
   </div>
 
   <div class="err" id="err" role="alert"></div>
@@ -226,7 +251,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const KEY='et-anamnese-v2';
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{v===null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
-const R={sexo:['Feminino','Masculino'],obj:['Emagrecer','Definir','Ganhar massa','Saúde e disposição','Preparar para evento'],exp:['Nunca treinei','Menos de 6 meses','6 meses a 2 anos','Mais de 2 anos'],local:['Academia','Em casa','Os dois'],dias:['2','3','4','5','6'],tempo:['30 min','45 min','1 hora','1h30'],ref:['3','4','5','6 ou mais'],sono:['Menos de 5h','5 a 6h','7 a 8h','Mais de 8h'],trab:['Sentado','Em pé','Físico/pesado'],estr:['Baixo','Médio','Alto'],coz:['Eu','Família','Compro pronto','Restaurante'],agua:['Menos de 1L','1 a 2L','2 a 3L','Mais de 3L'],alc:['Não bebo','Às vezes','Fim de semana','Frequente'],
+const R={sexo:['Feminino','Masculino'],aval:['Não fiz','Bioimpedância','Dobras cutâneas (adipômetro)','Outra (DEXA, ultrassom…)'],obj:['Emagrecer','Definir','Ganhar massa','Saúde e disposição','Preparar para evento'],exp:['Nunca treinei','Menos de 6 meses','6 meses a 2 anos','Mais de 2 anos'],local:['Academia','Em casa','Os dois'],dias:['2','3','4','5','6'],tempo:['30 min','45 min','1 hora','1h30'],ref:['3','4','5','6 ou mais'],sono:['Menos de 5h','5 a 6h','7 a 8h','Mais de 8h'],trab:['Sentado','Em pé','Físico/pesado'],estr:['Baixo','Médio','Alto'],coz:['Eu','Família','Compro pronto','Restaurante'],agua:['Menos de 1L','1 a 2L','2 a 3L','Mais de 3L'],alc:['Não bebo','Às vezes','Fim de semana','Frequente'],
  exames:['Sim, nos últimos 6 meses','Há mais de 6 meses','Nunca fiz ou não lembro'],
  horm:['Nunca usei','Já usei, não uso mais','Uso atualmente'],hormmed:['Sim','Não'],
  contra:['Não uso','Pílula','DIU hormonal','DIU de cobre','Implante','Injetável','Outro'],
@@ -258,6 +283,13 @@ function aplicarSexo(){const m=sexo()==='Masculino';
  $$('.so-m').forEach(e=>{e.hidden=!m;e.querySelectorAll('input,textarea').forEach(i=>i.disabled=!m)});
  $$('.g').forEach(e=>e.textContent=m?e.dataset.m:e.dataset.f);nomeCoz()}
 $('#ana').addEventListener('change',e=>{if(e.target.name==='sexo'){aplicarSexo();show()}});
+const avaldet=()=>{const v=document.querySelector('[name=aval]:checked')?.value||'';const on=!!v&&v!=='Não fiz';
+ $('#avaldet').hidden=!on;$$('#avaldet input:not([type=file]),#avaldet textarea').forEach(i=>i.disabled=!on)};
+$('#ana').addEventListener('change',e=>{if(e.target.name==='aval')avaldet()});
+let laudos=[];
+$('#laudo').onchange=()=>{laudos=[...$('#laudo').files].slice(0,3);
+ $('#laudolbl').textContent=laudos.length?laudos.map(f=>f.name).join(', '):'Toque para enviar (até 3 arquivos)';
+ $('#laudobox').classList.toggle('ok',laudos.length>0)};
 const hormdet=()=>{$('#hormdet').hidden=!(document.querySelector('[name=horm]:checked')?.value||'').match(/usei, não|atualmente/)};
 $('#ana').addEventListener('change',e=>{if(e.target.name==='horm')hormdet()});
 const steps=$$('.step');let cur=0;const fotos={};
@@ -282,9 +314,9 @@ $$('.drop input').forEach(inp=>inp.onchange=()=>{const f=inp.files[0];if(!f)retu
  let img=inp.parentNode.querySelector('img');if(!img){img=document.createElement('img');img.alt='';inp.parentNode.insertBefore(img,inp)}img.src=URL.createObjectURL(f)});
 
 /* Reduz a foto (lado maior 1600 px, JPEG 0,8) antes de enviar */
-function reduzir(file){return new Promise((ok,fail)=>{const url=URL.createObjectURL(file),img=new Image();
- img.onload=()=>{const M=1600,s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');
-  c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',0.8))};
+function reduzir(file,M=1600,Q=0.8){return new Promise((ok,fail)=>{const url=URL.createObjectURL(file),img=new Image();
+ img.onload=()=>{const s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');
+  c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',Q))};
  img.onerror=()=>{URL.revokeObjectURL(url);fail(new Error('Não conseguimos ler uma das fotos. Tente escolher outra.'))};img.src=url})}
 
 let enviando=false;
@@ -292,13 +324,19 @@ async function enviar(){if(enviando)return;enviando=true;const btn=$('#next'),ba
  const falhou=msg=>{enviando=false;btn.disabled=back.disabled=false;btn.textContent='Enviar anamnese';$('#err').textContent=msg||'Não conseguimos enviar agora. Confira sua internet e tente de novo. Suas respostas continuam salvas.'};
  let fotosData={};
  try{for(const k of Object.keys(fotos))fotosData[k]=await reduzir(fotos[k])}catch(e){return falhou(e.message)}
- const payload={dados:data(),fotos:fotosData};
+ const laudosData=[];
+ try{for(const f of laudos){
+  if(f.type==='application/pdf'){if(f.size>8*1024*1024)return falhou('O PDF da avaliação passa de 8 MB. Mande uma foto do resultado no lugar.');
+   laudosData.push({nome:f.name,dataUrl:await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)})})}
+  else laudosData.push({nome:f.name,dataUrl:await reduzir(f,2200,0.88)})}}
+ catch(e){return falhou('Não conseguimos ler o arquivo da avaliação. Tente outro.')}
+ const payload={dados:data(),fotos:fotosData,laudos:laudosData};
  const sucesso=()=>{store.set(KEY,null);$('#ana').hidden=true;$('#intro').hidden=true;$('#done').hidden=false;scrollTo(0,0)};
  if(window.ENVIO_URL){fetch(window.ENVIO_URL,{method:'POST',body:JSON.stringify(payload)}).then(r=>r.json()).then(r=>r&&r.ok?sucesso():falhou()).catch(()=>falhou())}
  else if(window.google&&google.script&&google.script.run){google.script.run.withSuccessHandler(sucesso).withFailureHandler(()=>falhou()).salvarAnamnese(payload)}
  else{window.__ultimoEnvio=payload;setTimeout(sucesso,300)} /* fora do Apps Script: prévia local */
 }
-load();aplicarSexo();hormdet();show();
+load();aplicarSexo();hormdet();avaldet();show();
 })();
 </script>
 </body>
